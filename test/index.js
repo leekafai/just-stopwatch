@@ -1,1 +1,1 @@
-require('./node.test.js')
+require('./node')

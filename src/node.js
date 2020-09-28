@@ -36,28 +36,51 @@ class Stopwatch {
     this._split_hr = null
     this._pause_ms = 0
     this._pause_hr = null
-    this._countdown_remain = 0
-    this._countdown_ms = null
-    this._countdown_need_continue = false
+
+    this._codn_pause_ms = 0
+    this._codn_pause_ms = 0
+    this._codn_remain = 0
+    this._codn_target_ms = null
+    this._codn_pause_flag = false
+    this._codn_pause_hr = null
     return this
   }
   /**
    * 
    * 监听事件
    * @param {string} event - 事件名称 
+   * @param {function} callback - 回调
    * @example
    * ```
    * .On('Start') // 开始时回调
    * .On('Countdown/timeout') // 倒计时结束时回调
    * ```
-   * 
-   * @param {function} callback - 回调
    */
   On(event = '', callback) {
     this.event.on(event, (d) => {
       typeof callback === 'function' && callback(d)
     })
     return this
+  }
+  /**
+   * 同步堵塞
+   * 
+   * ⚠ 同步堵塞，谨慎使用 ⚠
+   * @param {number} [ms] 
+   */
+  Block(ms = 1e3) {
+    Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+  }
+  /**
+   * 异步堵塞
+   * @param {number} [ms] 
+   */
+  async AsyncBlock(ms = 1e3) {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve()
+      }, ms)
+    })
   }
   /**
    * 
@@ -94,89 +117,106 @@ class Stopwatch {
    * @param {number} ms 
    */
   CountdownRestart(ms) {
-    if (this.countdown_timeout['_idleTimeout']) {
+    if (this._codn_tout['_idleTimeout']) {
       // 存在计时器，释放重置
-      clearTimeout(this.countdown_timeout)
+      clearTimeout(this._codn_tout)
     }
-    return this.Reset().Countdown(ms || this._countdown_ms)
+    return this.Reset().Countdown(ms || this._codn_target_ms)
   }
+  /**
+   * 倒计时触发超时
+   */
   _CountdownTimeoutEmit() {
+    // ms 实际用时 > 设置时间
+    console.log(this._codn_pause_ms, 'this._codn_pause_ms', this._hrtime2ms(process.hrtime(this._codn_start_hr)))
     const d = {
-      ms: this._hrtime2ms(process.hrtime(this._start_hr), -this.CountdownRemain())
+      ms: this._hrtime2ms(process.hrtime(this._codn_start_hr), -this._codn_pause_ms),
+      real_ms: this._hrtime2ms(process.hrtime(this._codn_start_hr))
     }
     this.event.emit('Countdown/timeout', d)
-    clearTimeout(this.countdown_timeout)
+    clearTimeout(this._codn_tout)
+    this.Reset()
   }
   /**
    * 设置倒计时，并立即开始倒数
    * @param {number} [ms] - 设置倒计时时间，毫秒
-   * @param {function} [callback] - 回调 callback。等同于 .On("Countdown/timeout")
-   * 
    */
   Countdown(ms) {
     const self = this
     this.Start()
-    this.countdown_timeout = setTimeout(() => {
+    this._codn_start_hr = this._codn_start_hr || process.hrtime()
+    this._codn_tout = setTimeout(() => {
       self._CountdownTimeoutEmit()
     }, ms)
-    this._countdown_ms = ms
-    // const now_hr = process.hrtime(this._start_hr)
+    console.log(ms, 'ms')
+    // 暂停后 Continue ，不改变最初的 target_ms
+    this._codn_target_ms = this._codn_target_ms || ms
     return this
   }
   /**
-   * 倒计时剩余时间
+   * 倒计时实际剩余时间
    * @returns {number} 剩余倒计时
    */
   CountdownRemain() {
     if (!this._start_hr) throw new Error(this.TIPS['NOT_STARTED'])
-    if (this._countdown_need_continue) {
-      return this._countdown_remain
-    }
-    const remain = this._hrtime2ms(process.hrtime(this._start_hr), -this._countdown_ms)
-    return (-remain)
+    if (this._codn_pause_flag) return this._codn_remain
+    const passed = this._hrtime2ms(process.hrtime(this._codn_start_hr))
+    if (this._codn_pause_ms) return this._codn_remain
+    this._codn_remain = this._codn_target_ms - (this._codn_pause_ms || passed)
+    return this._codn_remain
   }
+
   /**
- * 暂停计时。 
- * `.Continue()` 再次计时
- * @returns {number|null} - 剩余倒计时时间
- */
+   * 暂停计时。
+   * `.Continue()` 再次计时
+   * @returns {number|null} - 剩余倒计时时间
+   */
   CountdownPause() {
     if (!this._start_hr) {
       throw new Error(this.TIPS['NOT_STARTED'])
     }
-    if (this.countdown_timeout['_idleTimeout']) {
-      // 暂停倒计时
-      clearTimeout(this.countdown_timeout)
-      const remain = this.CountdownRemain()
-      // 记录倒计时需要恢复
-      this._countdown_need_continue = true
-      // 记录倒计时剩余时间
-      this._countdown_remain = remain
+    if (this._codn_pause_flag) return this._codn_remain
+    if (this._codn_tout['_idleTimeout']) {
+      clearTimeout(this._codn_tout)
+
+      // 剩余倒计时间,用于 continue 时生成新的定时器
+      this._codn_remain = this._codn_remain || this.CountdownRemain()
+      // 标记倒计时已暂停
+      this._codn_pause_flag = true
+      // 记录最近一次暂停倒计时的时间戳
+      this._codn_pause_hr = process.hrtime()
+
     }
-    return this._countdown_remain
+    return this._codn_remain
   }
+
   /**
- * 从暂停状态下恢复，继续计时
- * @example
- * ```
- * watch.Start()
- * func1() // 100ms
- * watch.Split() // -> 100
- * watch.Pause()
- * await func2() // 200ms
- * watch.Continue() //100
- * ```
- * @returns {number|null} - 剩余倒计时时间
- */
+   * 从暂停状态下恢复，继续计时
+   * @example
+   * ```
+   * watch.Start()
+   * func1() // 100ms
+   * watch.Split() // -> 100
+   * watch.Pause()
+   * await func2() // 200ms
+   * watch.Continue() //100
+   * ```
+   * @returns {number|null} - 剩余倒计时时间
+   */
   CountdownContinue() {
     if (!this._start_hr) {
       throw new Error(this.TIPS['NOT_STARTED'])
     }
-    if (this._countdown_need_continue) {
+    if (this._codn_pause_flag) {
+      this._codn_pause_flag = false
+      // 累计调用暂停倒数时已经处理的暂停时长
+      this._codn_pause_ms += this._hrtime2ms(process.hrtime(this._codn_pause_hr))
       // 继续倒计剩余时间
-      this.Countdown(this._countdown_remain)
+      this.Countdown(this._codn_remain)
     }
-    return this._countdown_remain
+    // 关闭 暂停标记
+
+    return this._codn_remain
   }
   /**
    * 开始计时
@@ -261,7 +301,11 @@ class Stopwatch {
     if (!this._start_hr) {
       throw new Error(this.TIPS['NOT_STARTED'])
     }
-    clearTimeout(this.countdown_timeout)
+
+    this._codn_tout &&
+      this._codn_tout['_idleTimeout'] &&
+      clearTimeout(this._codn_tout)
+
     const total_ms = this._calc2ms()
     this.event.emit('Stop', { ms: total_ms })
     this.event.removeAllListeners()
