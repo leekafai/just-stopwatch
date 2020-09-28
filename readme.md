@@ -4,18 +4,20 @@
 
 Measuring code execution time
 
+**测量得出的时间 = 测量代码时间 + 目标代码运行时间**
+
+**measure time = stopwatch execution time + target code execution time**
+
+**测量代码时间 可能约为 1ms ~ 3ms**
+
+**stopwatch execution time cost about 1ms ~ 3ms**
+
 - [x] Node.js > 8.0 (maybe support the older version)
 - [ ] Browser
 # Install
 
 ```shell
-npm i https://github.com/leekafai/just-stopwatch.git
-```
-
-# Test
-```shell
-npm run test
-
+npm i just-stopwatch
 ```
 
 # Usage
@@ -52,4 +54,10 @@ doSth(2e3) // be ignored
 console.log(sw.Continue()) // 1000  has been measured time
 doSth() // 2000 has been measured time  
 console.log(sw.Stop(), 'ms') // 2000 ms
+```
+
+# Test
+```shell
+npm run test
+
 ```
