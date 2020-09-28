@@ -1,24 +1,30 @@
 {
-  "name": "node-stopwatch",
+  "name": "just-stopwatch",
   "version": "1.0.0",
-  "description": "Node.js Stopwatch",
+  "description": "just a stopwatch",
   "main": "index.js",
   "scripts": {
     "test": "mocha test"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/leekafai/node-stopwatch.git"
+    "url": "git+https://github.com/leekafai/just-stopwatch.git"
   },
   "keywords": [
-    "stopwatch"
+    "stopwatch",
+    "measure",
+    "time",
+    "node",
+    "node.js",
+    "javascript",
+    "js"
   ],
   "author": "leekafai",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/leekafai/node-stopwatch/issues"
+    "url": "https://github.com/leekafai/just-stopwatch/issues"
   },
-  "homepage": "https://github.com/leekafai/node-stopwatch#readme",
+  "homepage": "https://github.com/leekafai/just-stopwatch#readme",
   "devDependencies": {
     "chai": "^4.2.0",
     "mocha": "^8.1.3"
