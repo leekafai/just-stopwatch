@@ -4,6 +4,8 @@
 
 Measuring code execution time
 
+- [x] Node.js > 8.0 (maybe support the older version)
+- [ ] Browser
 # Install
 
 ```shell
@@ -20,6 +22,7 @@ npm run test
 
 ```javascript
 const stopwatch = require('just-stopwatch')
+
 const doSth = (ms=1e3)=> {
   Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
 }
