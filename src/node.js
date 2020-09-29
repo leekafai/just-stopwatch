@@ -128,9 +128,10 @@ class Stopwatch {
    */
   _CountdownTimeoutEmit() {
     // ms 实际用时 > 设置时间
+    const realWorldMs = this._hrtime2ms(process.hrtime(this._codn_start_hr))
     const d = {
-      ms: this._hrtime2ms(process.hrtime(this._codn_start_hr), -this._codn_pause_ms),
-      real_ms: this._hrtime2ms(process.hrtime(this._codn_start_hr))
+      ms: realWorldMs - this._codn_pause_ms,
+      real_ms: realWorldMs
     }
     this.event.emit('Countdown/timeout', d)
     clearTimeout(this._codn_tout)
@@ -146,7 +147,7 @@ class Stopwatch {
     this._codn_start_hr = this._codn_start_hr || process.hrtime()
     this._codn_tout = setTimeout(() => {
       self._CountdownTimeoutEmit()
-    }, ms)
+    }, ms + 0.5)
     // 暂停后 Continue ，不改变最初的 target_ms
     this._codn_target_ms = this._codn_target_ms || ms
     return this

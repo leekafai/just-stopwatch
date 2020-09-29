@@ -49,10 +49,10 @@ describe(`倒计时`, function () {
     sw.Block(1e3) // - 0e3 
     sw.CountdownContinue()
 
-    // // ok
-    // sw.CountdownPause()
-    // sw.Block(1e3) // -1e3 = 1e3
-    // sw.CountdownContinue() // <1e3
+    // ok
+    sw.CountdownPause()
+    sw.Block(1e3) // -1e3 = 1e3
+    sw.CountdownContinue() // <1e3
 
   })
 })
