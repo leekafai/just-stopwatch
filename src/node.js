@@ -52,8 +52,9 @@ class Stopwatch {
    * @param {function} callback - 回调
    * @example
    * ```
-   * .On('Start') // 开始时回调
-   * .On('Countdown/timeout') // 倒计时结束时回调
+   * .On('Start') 
+   * .On('Countdown/timeout')
+   * .On('Stop',({ms,real_ms})=>{})
    * ```
    */
   On(event = '', callback) {
@@ -147,7 +148,7 @@ class Stopwatch {
     this._codn_start_hr = this._codn_start_hr || process.hrtime()
     this._codn_tout = setTimeout(() => {
       self._CountdownTimeoutEmit()
-    }, ms + 0.5)
+    }, ms)
     // 暂停后 Continue ，不改变最初的 target_ms
     this._codn_target_ms = this._codn_target_ms || ms
     return this
@@ -211,7 +212,7 @@ class Stopwatch {
       // 累计调用暂停倒数时已经处理的暂停时长
       this._codn_pause_ms += this._hrtime2ms(process.hrtime(this._codn_pause_hr))
       // 继续倒计剩余时间
-      this.Countdown(this._codn_remain)
+      this.Countdown(Math.ceil(this._codn_remain))
     }
     // 关闭 暂停标记
 
