@@ -12,8 +12,8 @@ Measuring code execution time
 
 **stopwatch execution time cost about 1ms ~ 3ms**
 
-- [x] Node.js > 8.0 (maybe support the older version)
-- [ ] Browser
+[x] Node.js > 8.0 (maybe support the older version)
+[ ] Browser
 # Install
 
 ```shell
@@ -36,13 +36,21 @@ doSth(3e3)
 const cost = sw.Stop()
 console.log(cost, 'ms') // 3000 ms
 
-// 多次获取时间
-// multi split
+// 多次获取间隔时间
+// multi slice
 const sw = stopwatch.Start()
 doSth()
-console.log(sw.Split()) // Start 是最早的一个 Split
+console.log(sw.Slice()) // Start 是最早的一个 slice
 doSth(2e3)
-console.log(sw.Split()) // 距离上一个 Split() 已经过去了多少时间
+console.log(sw.Slice()) // 距离上一个 Slice() 已经过去了多少时间
+console.log(sw.Stop(), 'ms') // 3000 ms
+
+// 多次获取计时结果
+const sw = stopwatch.Start()
+doSth() // 1e3 ms
+console.log(sw.Split()) // 1000
+doSth(2e3)
+console.log(sw.Split()) // 3000
 console.log(sw.Stop(), 'ms') // 3000 ms
 
 // 暂停后继续
@@ -89,8 +97,99 @@ sw.CountdownContinue() // 经过一秒后继续
 
 ```
 
+# Methods
+
+## 计时方法
+
+`Start()`
+
+开始
+
+Returns `Stopwatch`
 
 
+
+`Stop()`
+
+停止
+
+Returns `number` 开始至停止的时间
+
+`Pause()`
+
+暂停
+
+Returns `number` 开始至暂停的时间
+
+`Continue()`
+
+继续
+
+Returns `number` 开始至暂停的时间
+
+`Split()`
+
+立即获取当前计时
+
+Returns `number` 开始至现在的时间
+
+`Slice()`
+
+获取本次分割的时间
+
+Returns `number` 距离上次 `Slice()` 的时间。`Start()` 为最早的一次 `Slice()`
+
+
+`Restart()`
+
+重置计时
+
+Returns `Stopwatch`
+
+## 倒计时
+
+`Countdown(ms)`
+
+开始
+
+`ms`:`number` 倒计时间，毫秒
+
+Returns `Stopwatch`
+
+`CountdownPause()`
+
+暂停
+
+Returns `number` 剩余时间
+
+`CountdownContinue()`
+
+继续
+
+Returns `number` 剩余时间
+
+`CountdownRemain()`
+
+获取剩余时间
+
+Returns `number` 剩余时间
+
+`CountdownRestart(ms)`
+
+倒计时重置。可以中断已有的倒计时
+
+`ms`:`number` 倒计时间，毫秒
+
+Returns `Stopwatch`
+
+## 事件监听
+
+使用 `On(event,callback)` 进行事件监听
+| event             | callback args                | 触发条件         | 回调参数解释                                  |
+| ----------------- | ---------------------------- | ---------------- | --------------------------------------------- |
+| Start             | `null`                       | 计时开始时触发   |                                               |
+| Stop              | `{ms:number}`                | 计时结束时触发   | ms:毫秒                                       |
+| Countdown/timeout | `{ms:number,real_ms:number}` | 倒计时超时时触发 | ms:实际超时时间。real_ms:真实耗时（暂停影响） |
 
 # Test
 ```shell
