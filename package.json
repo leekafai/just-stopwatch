@@ -6,6 +6,7 @@
   "scripts": {
     "test": "mocha test"
   },
+  "browser": "index.browser.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/leekafai/just-stopwatch.git"
