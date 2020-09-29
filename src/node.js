@@ -33,7 +33,7 @@ class Stopwatch {
    */
   Reset() {
     this._start_hr = null
-    this._split_hr = null
+    this._slice_hr = null
     this._pause_ms = 0
     this._pause_hr = null
 
@@ -222,33 +222,49 @@ class Stopwatch {
    * 
    */
   Start() {
+    if (this._start_hr) {
+      return this.Restart()
+    }
     (this._start_hr = process.hrtime())
     this.event.emit('Start')
     return this
   }
 
   /**
-   * 获取上一个 split 至现在所耗费的时间
-   * 可用于计算多个 func 分别运行的时间
-   * 开始为默认的第一个 split
+   * 获取开始至到现在的时间
    * @example
    * ```
    * watch.Start()
    * func() // 100ms
    * watch.Split() //-> 100
-   * await func2() // 200ms
-   * watch.Split() // -> 200
+   * await func2() // 200
+   * watch.Split() // -> 300
    * watch.Stop() // -> 300
    * ```
-   * @returns - 距离上一个 split 所耗费的时间
+   * @returns - 从开始到现在
    */
   Split() {
     if (!this._start_hr) {
       throw new Error(this.TIPS['NOT_STARTED'])
     }
-    const split = process.hrtime(this._split_hr || this._start_hr)
-    this._split_hr = process.hrtime()
-    return this._hrtime2ms(split)
+    return this._calc2ms()
+  }
+  /**
+   * 获取两个 Slice 之间的时间
+   * 第一个 Slice 获取的值与 Split 相同
+   * watch.Start()
+   * func() // 100ms
+   * watch.Slice() //-> 100
+   * await func2() // 200
+   * watch.Slice() // -> 200
+   */
+  Slice() {
+    if (!this._start_hr) {
+      throw new Error(this.TIPS['NOT_STARTED'])
+    }
+    const slice = this._hrtime2ms(process.hrtime(this._slice_hr || this._start_hr))
+    this._slice_hr = process.hrtime()
+    return slice
   }
   /**
    * 暂停计时。 
