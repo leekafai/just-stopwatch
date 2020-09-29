@@ -1,2 +1,3 @@
-require('./count.test')
+
 require('./countdown.test')
+require('./count.test')

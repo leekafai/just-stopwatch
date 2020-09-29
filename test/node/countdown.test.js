@@ -33,7 +33,7 @@ describe(`倒计时`, function () {
     // return
     // 5e3 - 1e3 剩余 4e3 时暂停，然后再倒计时
     // 总倒计时 5e3，实际时间花销 5e3 + 2e3 
-    const timeout = 4e3
+    const timeout = 5e3
     const sw = stopwatch()
     sw.On('Countdown/timeout', ({ ms, real_ms }) => {
       console.log(sw.label)
