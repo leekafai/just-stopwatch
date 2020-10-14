@@ -82,9 +82,8 @@ sw.CountdownRestart(2e3) // 立即将倒计时设定为 2 秒
 
 const timeout = 5e3
 const sw = stopwatch()
-sw.On('Countdown/timeout', ({ ms, real_ms }) => {
+sw.On('Countdown/timeout', ({ ms }) => {
   console.log('倒计时实际超时时间',ms)
-  console.log('真实世界消耗时间',real_ms) // 比 ms 多出了暂停到继续之间的时间
 })
 sw.Countdown(timeout) // 5s
 doSth(1e3) 
@@ -185,11 +184,11 @@ Returns `Stopwatch`
 ## 事件监听
 
 使用 `On(event,callback)` 进行事件监听
-| event             | callback args                | 触发条件         | 回调参数解释                                  |
-| ----------------- | ---------------------------- | ---------------- | --------------------------------------------- |
-| Start             | `null`                       | 计时开始时触发   |                                               |
-| Stop              | `{ms:number}`                | 计时结束时触发   | ms:毫秒                                       |
-| Countdown/timeout | `{ms:number,real_ms:number}` | 倒计时超时时触发 | ms:实际超时时间。real_ms:真实耗时（暂停影响） |
+| event             | callback args | 触发条件         | 回调参数解释    |
+| ----------------- | ------------- | ---------------- | --------------- |
+| Start             | `null`        | 计时开始时触发   |                 |
+| Stop              | `{ms:number}` | 计时结束时触发   | ms:毫秒         |
+| Countdown/timeout | `{ms:number}` | 倒计时超时时触发 | ms:实际超时时间 |
 
 # Test
 ```shell
