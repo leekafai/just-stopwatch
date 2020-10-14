@@ -13,7 +13,8 @@ Measuring code execution time
 **stopwatch execution time cost about 1ms ~ 3ms**
 
 [x] Node.js > 8.0 (maybe support the older version)
-[ ] Browser
+
+[x] Browser
 # Install
 
 ```shell
@@ -31,14 +32,14 @@ const doSth = (ms=1e3)=> {
 
 // 简单地测量一下代码运行耗时
 // simply measure `doSth()` execution time
-const sw = stopwatch.Start()
+const sw = stopwatch().Start()
 doSth(3e3)
 const cost = sw.Stop()
 console.log(cost, 'ms') // 3000 ms
 
 // 多次获取间隔时间
 // multi slice
-const sw = stopwatch.Start()
+const sw = stopwatch().Start()
 doSth()
 console.log(sw.Slice()) // Start 是最早的一个 slice
 doSth(2e3)
@@ -46,7 +47,7 @@ console.log(sw.Slice()) // 距离上一个 Slice() 已经过去了多少时间
 console.log(sw.Stop(), 'ms') // 3000 ms
 
 // 多次获取计时结果
-const sw = stopwatch.Start()
+const sw = stopwatch().Start()
 doSth() // 1e3 ms
 console.log(sw.Split()) // 1000
 doSth(2e3)
@@ -55,7 +56,7 @@ console.log(sw.Stop(), 'ms') // 3000 ms
 
 // 暂停后继续
 // pause and continue
-const sw = stopwatch.Start()
+const sw = stopwatch().Start()
 doSth()
 console.log(sw.Pause()) // 暂停测量
 doSth(2e3) // be ignored
